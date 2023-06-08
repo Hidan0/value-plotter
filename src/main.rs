@@ -5,6 +5,8 @@ use std::thread;
 use clap::{command, Parser};
 use eframe::egui::plot::{Line, Plot};
 use eframe::NativeOptions;
+use tracing::{error, info, warn, Level};
+use tracing_subscriber::FmtSubscriber;
 
 use self::measurements::Measurements;
 
@@ -59,7 +61,11 @@ impl eframe::App for App {
 
 fn main() {
     let args = Args::parse();
-    let native_options = NativeOptions::default();
+
+    let subscriber = FmtSubscriber::builder()
+        .with_max_level(Level::DEBUG)
+        .finish();
+    tracing::subscriber::set_global_default(subscriber).expect("Setting default subcriber failed");
 
     let app = App::new(args.window, args.include_y);
     let ui_measurement = app.measurements.clone();
@@ -68,16 +74,28 @@ fn main() {
         let stdin = std::io::stdin();
         for line in stdin.lock().lines() {
             match line {
-                Ok(value) => ui_measurement.lock().unwrap().append_value_str(&value),
-                Err(_) => return,
+                Ok(value) => {
+                    if let Ok(val) = value.parse::<f64>() {
+                        ui_measurement.lock().unwrap().append_value(val);
+                    } else {
+                        warn!("Failed to parse {}", value);
+                    }
+                }
+                Err(_) => {
+                    error!("Failed to read line");
+                    break;
+                }
             }
         }
     });
 
-    eframe::run_native(
+    info!("Main thread started");
+    match eframe::run_native(
         "Serial Monitoring App",
-        native_options,
+        NativeOptions::default(),
         Box::new(|_| Box::new(app)),
-    )
-    .unwrap();
+    ) {
+        Ok(_) => {}
+        Err(e) => error!("Main thread crashed: {}", e),
+    }
 }

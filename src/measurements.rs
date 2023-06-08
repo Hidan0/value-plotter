@@ -45,12 +45,6 @@ impl Measurements {
         }
     }
 
-    pub fn append_value_str(&mut self, s: &str) {
-        if let Ok(v) = s.parse::<f64>() {
-            self.append_value(v);
-        }
-    }
-
     pub fn values(&self) -> PlotPoints {
         PlotPoints::from_iter(self.values.iter().copied())
     }
