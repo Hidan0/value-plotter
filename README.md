@@ -1,4 +1,4 @@
-# Serial Monitoring
+# Serial Plotter
 
 ## Introduction
 
