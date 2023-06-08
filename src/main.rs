@@ -38,7 +38,7 @@ impl eframe::App for App {
 fn main() {
     let native_options = NativeOptions::default();
 
-    let app = App::new(500.);
+    let app = App::new(4000.);
     let ui_measurement = app.measurements.clone();
 
     thread::spawn(move || {

@@ -20,16 +20,21 @@ impl Measurements {
             values: VecDeque::default(),
             start: Instant::now(),
             last_x_value: 0.,
-            window_size: window_size / TO_SECONDS,
+            window_size,
         }
     }
 
     pub fn append_value(&mut self, v: f64) {
+        if self.values.is_empty() {
+            self.start = Instant::now();
+        }
+
         let x = self.start.elapsed().as_millis() as f64 / TO_SECONDS;
 
-        let min_x = x - self.window_size;
-        self.values.push_back([self.last_x_value + x, v]);
         self.last_x_value += x;
+        let min_x = self.last_x_value - self.window_size;
+
+        self.values.push_back([self.last_x_value, v]);
 
         while let Some(value) = self.values.front() {
             if value[0] < min_x {
@@ -41,8 +46,9 @@ impl Measurements {
     }
 
     pub fn append_value_str(&mut self, s: &str) {
-        let v = s.parse::<f64>().unwrap();
-        self.append_value(v)
+        if let Ok(v) = s.parse::<f64>() {
+            self.append_value(v);
+        }
     }
 
     pub fn values(&self) -> PlotPoints {
