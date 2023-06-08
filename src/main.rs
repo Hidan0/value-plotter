@@ -15,9 +15,9 @@ struct App {
 }
 
 impl App {
-    fn new() -> Self {
+    fn new(window_size: f64) -> Self {
         Self {
-            measurements: Arc::new(Mutex::new(Measurements::new())),
+            measurements: Arc::new(Mutex::new(Measurements::new(window_size))),
         }
     }
 }
@@ -38,7 +38,7 @@ impl eframe::App for App {
 fn main() {
     let native_options = NativeOptions::default();
 
-    let app = App::new();
+    let app = App::new(500.);
     let ui_measurement = app.measurements.clone();
 
     thread::spawn(move || {
