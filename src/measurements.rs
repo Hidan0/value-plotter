@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 use std::time::Instant;
 
-use egui::plot::PlotPoints;
+use eframe::egui::plot::PlotPoints;
 
 /// One second is equal to one thousand milliseconds
 const TO_SECONDS: f64 = 1000.;

@@ -4,6 +4,7 @@ use std::thread;
 
 use clap::{command, Parser};
 use eframe::egui::plot::{Line, Plot};
+use eframe::egui::{CentralPanel, Context};
 use eframe::NativeOptions;
 use tracing::{error, info, warn, Level};
 use tracing_subscriber::FmtSubscriber;
@@ -41,8 +42,8 @@ impl App {
 }
 
 impl eframe::App for App {
-    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        egui::CentralPanel::default().show(ctx, |ui| {
+    fn update(&mut self, ctx: &Context, _frame: &mut eframe::Frame) {
+        CentralPanel::default().show(ctx, |ui| {
             let mut plot = Plot::new("measurements");
 
             if let Some(ys) = &self.include_y {
