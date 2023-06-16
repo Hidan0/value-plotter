@@ -24,19 +24,25 @@ struct Args {
     /// y values to include in the plot
     #[arg(short, long)]
     include_y: Option<Vec<f64>>,
+
+    /// Enables the ability to save a screenshot of the current plot
+    #[arg(short, long, default_value_t = false)]
+    savable: bool,
 }
 
 #[derive(Debug)]
 struct App {
     measurements: Arc<Mutex<Measurements>>,
     include_y: Option<Vec<f64>>,
+    savable: bool,
 }
 
 impl App {
-    fn new(window_size: f64, include_y: Option<Vec<f64>>) -> Self {
+    fn new(window_size: f64, include_y: Option<Vec<f64>>, savable: bool) -> Self {
         Self {
             measurements: Arc::new(Mutex::new(Measurements::new(window_size))),
             include_y,
+            savable,
         }
     }
 }
@@ -58,11 +64,13 @@ impl eframe::App for App {
         });
         ctx.request_repaint();
 
-        ctx.input_mut(|i| {
-            if i.consume_shortcut(&KeyboardShortcut::new(Modifiers::CTRL, Key::S)) {
-                info!("Shortcut pressed!");
-            }
-        });
+        if self.savable {
+            ctx.input_mut(|i| {
+                if i.consume_shortcut(&KeyboardShortcut::new(Modifiers::CTRL, Key::S)) {
+                    info!("Shortcut pressed!");
+                }
+            });
+        }
     }
 }
 
@@ -74,7 +82,7 @@ fn main() {
         .finish();
     tracing::subscriber::set_global_default(subscriber).expect("Setting default subcriber failed");
 
-    let app = App::new(args.window, args.include_y);
+    let app = App::new(args.window, args.include_y, args.savable);
     let ui_measurement = app.measurements.clone();
 
     thread::spawn(move || {
