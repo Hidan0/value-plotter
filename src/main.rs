@@ -4,7 +4,7 @@ use std::thread;
 
 use clap::{command, Parser};
 use eframe::egui::plot::{Line, Plot};
-use eframe::egui::{CentralPanel, Context};
+use eframe::egui::{CentralPanel, Context, Key, KeyboardShortcut, Modifiers};
 use eframe::NativeOptions;
 use tracing::{error, info, warn, Level};
 use tracing_subscriber::FmtSubscriber;
@@ -57,6 +57,12 @@ impl eframe::App for App {
             });
         });
         ctx.request_repaint();
+
+        ctx.input_mut(|i| {
+            if i.consume_shortcut(&KeyboardShortcut::new(Modifiers::CTRL, Key::S)) {
+                info!("Shortcut pressed!");
+            }
+        });
     }
 }
 
