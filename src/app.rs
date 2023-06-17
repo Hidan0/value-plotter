@@ -12,6 +12,8 @@ use std::sync::{Arc, Mutex};
 
 use crate::measurements::Measurements;
 
+type Result<T> = core::result::Result<T, Box<dyn Error>>;
+
 #[derive(Debug)]
 pub struct App {
     measurements: Arc<Mutex<Measurements>>,
@@ -34,7 +36,7 @@ impl App {
         self.measurements.clone()
     }
 
-    pub fn save_current_plot(&self, frame: &ColorImage) -> Result<(), Box<dyn Error>> {
+    pub fn save_current_plot(&self, frame: &ColorImage) -> Result<()> {
         let img_path = format!(
             "{}/imgs/{}.png",
             env::current_dir()?.display(),
@@ -92,7 +94,6 @@ impl eframe::App for App {
                     Err(e) => warn!("Can not save current plot: {}", e),
                 };
             }
-            self.save_current_plot = false;
         }
     }
 }
