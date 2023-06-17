@@ -1,16 +1,14 @@
 use std::io::BufRead;
-use std::sync::{Arc, Mutex};
 use std::thread;
 
 use clap::{command, Parser};
-use eframe::egui::plot::{Line, Plot};
-use eframe::egui::{CentralPanel, Context, Key, KeyboardShortcut, Modifiers};
 use eframe::NativeOptions;
 use tracing::{error, info, warn, Level};
 use tracing_subscriber::FmtSubscriber;
 
-use self::measurements::Measurements;
+use crate::app::App;
 
+mod app;
 mod measurements;
 
 /// A simple tool to monitor and plot values
@@ -30,50 +28,6 @@ struct Args {
     savable: bool,
 }
 
-#[derive(Debug)]
-struct App {
-    measurements: Arc<Mutex<Measurements>>,
-    include_y: Option<Vec<f64>>,
-    savable: bool,
-}
-
-impl App {
-    fn new(window_size: f64, include_y: Option<Vec<f64>>, savable: bool) -> Self {
-        Self {
-            measurements: Arc::new(Mutex::new(Measurements::new(window_size))),
-            include_y,
-            savable,
-        }
-    }
-}
-
-impl eframe::App for App {
-    fn update(&mut self, ctx: &Context, _frame: &mut eframe::Frame) {
-        CentralPanel::default().show(ctx, |ui| {
-            let mut plot = Plot::new("measurements");
-
-            if let Some(ys) = &self.include_y {
-                for y in ys.iter() {
-                    plot = plot.include_y(*y);
-                }
-            }
-
-            plot.show(ui, |plot_ui| {
-                plot_ui.line(Line::new(self.measurements.lock().unwrap().values()));
-            });
-        });
-        ctx.request_repaint();
-
-        if self.savable {
-            ctx.input_mut(|i| {
-                if i.consume_shortcut(&KeyboardShortcut::new(Modifiers::CTRL, Key::S)) {
-                    info!("Shortcut pressed!");
-                }
-            });
-        }
-    }
-}
-
 fn main() {
     let args = Args::parse();
 
@@ -83,7 +37,7 @@ fn main() {
     tracing::subscriber::set_global_default(subscriber).expect("Setting default subcriber failed");
 
     let app = App::new(args.window, args.include_y, args.savable);
-    let ui_measurement = app.measurements.clone();
+    let ui_measurement = app.measurements();
 
     thread::spawn(move || {
         let stdin = std::io::stdin();
