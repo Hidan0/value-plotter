@@ -20,7 +20,7 @@ struct Args {
     window: usize,
 
     /// y values to include in the plot
-    #[arg(short, long)]
+    #[arg(short, long, allow_hyphen_values = true, num_args = 1.., value_delimiter = ' ')]
     include_y: Option<Vec<f64>>,
 
     /// Enables the ability to save a screenshot of the current plot
