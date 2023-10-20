@@ -23,7 +23,7 @@ pub struct App {
 }
 
 impl App {
-    pub fn new(window_size: f64, include_y: Option<Vec<f64>>, savable: bool) -> Self {
+    pub fn new(window_size: usize, include_y: Option<Vec<f64>>, savable: bool) -> Self {
         Self {
             measurements: Arc::new(Mutex::new(Measurements::new(window_size))),
             include_y,

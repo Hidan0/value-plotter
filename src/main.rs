@@ -16,8 +16,8 @@ mod measurements;
 #[command(author, version, about, long_about = None)]
 struct Args {
     /// Maximum x to display before the screen starts scrolling
-    #[arg(short, long, default_value_t = 2000.)]
-    window: f64,
+    #[arg(short, long, default_value_t = 1000)]
+    window: usize,
 
     /// y values to include in the plot
     #[arg(short, long)]
