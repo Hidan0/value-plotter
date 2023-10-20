@@ -44,11 +44,8 @@ fn main() {
         for line in stdin.lock().lines() {
             match line {
                 Ok(value) => {
-                    if let Ok(val) = value.parse::<f64>() {
-                        ui_measurement.lock().unwrap().append_value(val);
-                    } else {
-                        warn!("Failed to parse {}", value);
-                    }
+                    let values = parse_input(value);
+                    ui_measurement.lock().unwrap().append_value(values);
                 }
                 Err(_) => {
                     error!("Failed to read line");
@@ -67,4 +64,19 @@ fn main() {
         Ok(_) => {}
         Err(e) => error!("Main thread crashed: {}", e),
     }
+}
+
+fn parse_input(input: String) -> Vec<f64> {
+    let mut out = Vec::new();
+
+    for val in input.split(',') {
+        match val.parse::<f64>() {
+            Ok(val) => out.push(val),
+            Err(_) => {
+                warn!("Failed to parse value: {}", val);
+            }
+        }
+    }
+
+    out
 }

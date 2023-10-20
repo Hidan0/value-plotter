@@ -8,7 +8,7 @@ const TO_SECONDS: f64 = 1000.;
 
 #[derive(Debug)]
 pub struct Measurements {
-    values: VecDeque<[f64; 2]>,
+    values: Vec<VecDeque<[f64; 2]>>,
     start: Instant,
     last_x_value: f64,
     pub window_size: f64,
@@ -17,16 +17,21 @@ pub struct Measurements {
 impl Measurements {
     pub fn new(window_size: f64) -> Self {
         Self {
-            values: VecDeque::default(),
+            values: Vec::new(),
             start: Instant::now(),
             last_x_value: 0.,
             window_size,
         }
     }
 
-    pub fn append_value(&mut self, v: f64) {
+    pub fn append_value(&mut self, vs: Vec<f64>) {
         if self.values.is_empty() {
             self.start = Instant::now();
+            if self.values.len() < vs.len() {
+                for _ in 0..vs.len() {
+                    self.values.push(VecDeque::new());
+                }
+            }
         }
 
         let x = self.start.elapsed().as_millis() as f64 / TO_SECONDS;
@@ -34,18 +39,29 @@ impl Measurements {
         self.last_x_value += x;
         let min_x = self.last_x_value - self.window_size;
 
-        self.values.push_back([self.last_x_value, v]);
+        vs.iter().enumerate().for_each(|(i, v)| {
+            self.values
+                .get_mut(i)
+                .unwrap()
+                .push_back([self.last_x_value, *v])
+        });
 
-        while let Some(value) = self.values.front() {
-            if value[0] < min_x {
-                self.values.pop_front();
-            } else {
-                break;
+        for values in self.values.iter_mut() {
+            while let Some(value) = values.front() {
+                if value[0] < min_x {
+                    values.pop_front();
+                } else {
+                    break;
+                }
             }
         }
     }
 
-    pub fn values(&self) -> PlotPoints {
-        PlotPoints::from_iter(self.values.iter().copied())
+    pub fn values(&self) -> Vec<PlotPoints> {
+        let mut out = Vec::new();
+        for values in self.values.iter() {
+            out.push(PlotPoints::from_iter(values.iter().copied()));
+        }
+        out
     }
 }

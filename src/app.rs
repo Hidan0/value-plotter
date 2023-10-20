@@ -70,7 +70,9 @@ impl eframe::App for App {
             }
 
             plot.show(ui, |plot_ui| {
-                plot_ui.line(Line::new(self.measurements.lock().unwrap().values()));
+                for values in self.measurements.lock().unwrap().values() {
+                    plot_ui.line(Line::new(values));
+                }
             });
         });
 
